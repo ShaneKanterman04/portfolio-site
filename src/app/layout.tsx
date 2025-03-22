@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,11 +16,13 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <header className="w-full flex items-center justify-between p-4 bg-gray-800 text-white fixed top-0">
-          <h1 className="text-xl">Shane Kanterman's Portfolio</h1>
-          <img
+          <h1 className="text-xl">Shane Kanterman&apos;s Portfolio</h1>
+          <Image
             src="/pp.jpeg"
             alt="Shane Kanterman"
             className="rounded-full h-18 w-18"
+            width={72}
+            height={72}
           />
         </header>
         <div className="pt-16">{children}</div>
