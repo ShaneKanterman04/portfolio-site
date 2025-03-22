@@ -27,3 +27,89 @@ body {
   color: var(--foreground);
   font-family: var(--font-main);
 }
+
+
+.project-card {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border); /* Added border property */
+  box-shadow: 0 0 0 1px var(--color-border);
+  transition: box-shadow 0.2s;
+  padding: 1rem;
+  margin: 1rem 0;
+  outline: 1px solid var(--color-border); /* Added outline property */
+}
+
+.project-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.project-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-description {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.project-skills {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.project-skills li {
+  background: var(--color-foreground);
+  color: var(--color-background);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.gallery-container {
+  width: 40%;
+  max-width: 600px;
+  margin-top: 1rem;
+}
+
+.carousel-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto; /* Center horizontally */
+  text-align: center; /* Ensure text alignment is centered */
+}
+
+.carousel {
+  width: 60%; /* Set the width of the carousel */
+  max-width: 100%; /* Ensure it doesn't exceed the container */
+  margin: 0 auto; /* Center the carousel */
+}
+
+.carousel .control-arrow {
+  background-color: var(--color-foreground);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.3s;
+  position: absolute;
+  scale: 4;
+}
+
+.carousel .control-arrow:hover {
+  transform: scale(1.4);
+}
+
+
+
