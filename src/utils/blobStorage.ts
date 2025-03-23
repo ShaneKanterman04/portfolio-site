@@ -1,9 +1,14 @@
 import { put } from '@vercel/blob';
 
-// The Vercel Blob storage URL for projects file
-const blobBaseUrl = "https://sp81igolvtunzwsc.public.blob.vercel-storage.com";
-const projectsPath = "/projects-7B1RGZQX0jOkt5dCyMjKgfK12y7cdz.json";
+// Use environment variables for Blob storage configuration
+const blobBaseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || "";
+const projectsPath = process.env.NEXT_PUBLIC_PROJECTS_PATH || "";
 const blobUrl = blobBaseUrl + projectsPath;
+
+// Validate environment variables
+if (!blobBaseUrl || !projectsPath) {
+  console.warn('Blob storage environment variables are not properly configured');
+}
 
 // Cache for projects data to reduce redundant fetches
 let projectsCache: Record<string, unknown>[] | null = null;
