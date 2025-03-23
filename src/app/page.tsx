@@ -3,9 +3,18 @@
 import ProjectCarousel from "@/components/ProjectCarousel";
 import React, { useEffect, useState, useRef } from "react";
 
+// Define a type for projects
+type Project = {
+  title: string;
+  image: string[];
+  skills: string[];
+  description: string;
+  [key: string]: unknown; // Allow for additional properties
+};
+
 export default function Home() {
-  const [projects, setProjects] = useState([]);
-  const [error, setError] = useState(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
 
   useEffect(() => {
@@ -39,14 +48,14 @@ export default function Home() {
         }
         
         // Use data directly without filtering
-        let projectsArray = Array.isArray(data) ? data : 
+        const projectsArray = Array.isArray(data) ? data : 
                           (data.projects && Array.isArray(data.projects)) ? data.projects : [];
         
         console.log('Home: Projects array:', projectsArray);
         console.log('Home: Number of projects:', projectsArray.length);
         
         // Debugging each project individually
-        projectsArray.forEach((project, index) => {
+        projectsArray.forEach((project: Project, index: number) => {
           console.log(`Project ${index}:`, project);
         });
         

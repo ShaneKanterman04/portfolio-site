@@ -3,6 +3,7 @@
 import type { PutBlobResult } from '@vercel/blob';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProjectImageUploadPage() {
   const inputFileRef = useRef<HTMLInputElement>(null);
@@ -72,9 +73,11 @@ export default function ProjectImageUploadPage() {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm font-medium text-gray-700 mb-2">Image uploaded successfully!</p>
             <div className="mb-4">
-              <img 
+              <Image 
                 src={blob.url} 
                 alt="Uploaded preview" 
+                width={500} 
+                height={300} 
                 className="max-h-40 mx-auto rounded-md shadow-sm" 
               />
             </div>

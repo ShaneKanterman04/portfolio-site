@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { saveProjectsToBlob, getProjectsFromBlob, invalidateProjectsCache } from '@/utils/blobStorage';
+import { saveProjectsToBlob, invalidateProjectsCache } from '@/utils/blobStorage';
 
-// Sample initial projects
-const initialProjects = [
-  {
-    "title": "Portfolio Website",
-    "image": ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
-    "skills": ["React", "Next.js", "Tailwind CSS"],
-    "description": "A personal portfolio website built with modern web technologies."
-  }
-];
-
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_: NextRequest) {
   try {
     // Read initial data from local file
     const dataFilePath = path.join(process.cwd(), 'data', 'projects.json');

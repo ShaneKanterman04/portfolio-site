@@ -28,7 +28,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     thumbnail: img,
   }));
 
-  const getSkillsArray = (skills) => {
+  const getSkillsArray = (skills: string | string[] | Record<string, string> | null | undefined) => {
     if (!skills) return [];
     if (Array.isArray(skills)) return skills;
     if (typeof skills === 'string') return skills.split(',').map(s => s.trim());

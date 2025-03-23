@@ -6,14 +6,14 @@ const projectsPath = "/projects-7B1RGZQX0jOkt5dCyMjKgfK12y7cdz.json";
 const blobUrl = blobBaseUrl + projectsPath;
 
 // Cache for projects data to reduce redundant fetches
-let projectsCache: any[] | null = null;
+let projectsCache: Record<string, unknown>[] | null = null;
 
 /**
  * Fetch projects from the Vercel Blob storage
  * @param forceRefresh Force a refresh from storage instead of using cache
  * @returns Array of projects
  */
-export async function getProjectsFromBlob(forceRefresh = false): Promise<any[]> {
+export async function getProjectsFromBlob(forceRefresh = false): Promise<Record<string, unknown>[]> {
   // Return cached data if available and not forcing refresh
   if (projectsCache && !forceRefresh) {
     return projectsCache;
@@ -57,7 +57,7 @@ export async function getProjectsFromBlob(forceRefresh = false): Promise<any[]> 
  * @param projects Array of projects to save
  * @returns Result of the blob upload
  */
-export async function saveProjectsToBlob(projects: any[]) {
+export async function saveProjectsToBlob(projects: Record<string, unknown>[]) {
   try {
     console.log('Saving projects to blob storage');
     

@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
     // Save the updated projects array back to blob storage
     const result = await saveProjectsToBlob(projects);
     
+    // Invalidate cache to ensure fresh data on next fetch
+    invalidateProjectsCache();
+    
     return NextResponse.json({ 
       success: true,
       url: result.url
