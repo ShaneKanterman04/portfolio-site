@@ -1,27 +1,36 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import fs from "fs";
-import path from "path";
 import { logger } from "../../utils/logger";
 import { withLogging } from "../../middleware/apiLogger";
+import { getProjects } from "../../utils/blobStorage";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
-    const filePath = path.join(process.cwd(), "public", "projects.json");
-    logger.debug(`Looking for projects file at: ${filePath}`);
+    logger.debug(`Retrieving projects from Blob storage`);
     
-    if (fs.existsSync(filePath)) {
-      try {
-        const fileContents = fs.readFileSync(filePath, "utf8");
-        const projects = JSON.parse(fileContents);
-        logger.info(`Successfully retrieved ${projects.length} projects`);
-        res.status(200).json(projects);
-      } catch (error) {
-        logger.error("Error parsing projects file", { error });
-        res.status(500).json({ message: "Error reading projects data", error: (error as Error).message });
+    try {
+      const { projects, success, error, exists } = await getProjects();
+      
+      if (!success) {
+        logger.error("Error retrieving projects from Blob storage", { error });
+        return res.status(500).json({ 
+          message: "Error reading projects data", 
+          error: error instanceof Error ? error.message : "Unknown error" 
+        });
       }
-    } else {
-      logger.warn(`Projects file not found at path: ${filePath}`);
-      res.status(404).json({ message: "Projects file not found" });
+      
+      if (!exists) {
+        logger.warn("Projects blob not found, returning empty array");
+      } else {
+        logger.info(`Successfully retrieved ${projects.length} projects`);
+      }
+      
+      res.status(200).json(projects);
+    } catch (error) {
+      logger.error("Unexpected error in getProjects API", { error });
+      res.status(500).json({ 
+        message: "Server error", 
+        error: (error as Error).message 
+      });
     }
   } else {
     logger.warn(`Method not allowed: ${req.method}`);
