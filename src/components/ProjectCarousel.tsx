@@ -6,7 +6,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import ProjectCard from "./ProjectCard";
 
 interface Project {
-  image: string;
+  image: string | string[];
   title: string;
   skills: string[];
   description: string;
@@ -17,14 +17,14 @@ interface ProjectCarouselProps {
 }
 
 const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ projects }) => {
-    console.log("ProjectCarousel:", { projects });
+  console.log("ProjectCarousel:", { projects });
   return (
     <div className="carousel-wrapper">
       <Carousel className="carousel" centerMode={true} showThumbs={false} infiniteLoop useKeyboardArrows>
         {projects.map((project, index) => (
           <div key={index}>
             <ProjectCard 
-              image={project.image} 
+              image={Array.isArray(project.image) ? project.image : [project.image]} 
               title={project.title} 
               skills={project.skills} 
               description={project.description} 
