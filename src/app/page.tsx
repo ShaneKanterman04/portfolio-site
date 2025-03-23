@@ -1,27 +1,16 @@
+"use client"
+
 import ProjectCarousel from "@/components/ProjectCarousel";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
-  const sampleProjects = [
-    {
-      image: "pp.jpeg",
-      title: "Project One",
-      skills: ["React", "Node.js", "CSS"],
-      description: "Description for project one"
-    },
-    {
-      image: "pp.jpeg",
-      title: "Project Two",
-      skills: ["Python", "Django", "JavaScript"],
-      description: "Description for project two"
-    },
-    {
-      image: "/images/project3.png",
-      title: "Project Three",
-      skills: ["C++", "Qt", "OpenGL"],
-      description: "Description for project three"
-    },
-  ];
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    fetch("/projects.json")
+      .then((response) => response.json())
+      .then((data) => setProjects(data));
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -43,7 +32,7 @@ export default function Home() {
             looking to learn new things and improve my skills.
           </p>       
           <div className="w-200">
-          <ProjectCarousel projects={sampleProjects} />   
+          <ProjectCarousel key={projects.length} projects={projects} />   
           </div>
             
         </div>

@@ -26,8 +26,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-main);
+  font-size: 16px; /* Increase base font size */
+  line-height: 1.6; /* Improve line height for readability */
 }
-
 
 .project-card {
   background: var(--color-background);
@@ -60,7 +61,7 @@ body {
 
 .project-skills {
   list-style: none;
-  padding: 0;
+  padding-top: 10;
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -73,6 +74,7 @@ body {
   width: 100;
   height: 30px;
   line-height: 30px;
+  text-align: center;
   border-radius: 2rem;
 }
 
@@ -113,5 +115,106 @@ body {
   transform: scale(1.4);
 }
 
+.project-card-skills-title {
+  padding: 5px;
+}
 
+.project-skills-container {
+  text-align: left;
+  
+}
 
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-background);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form input, form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  font-family: var(--font-main);
+}
+
+form button {
+  padding: 0.75rem;
+  background: var(--color-foreground);
+  color: var(--color-background);
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+form button:hover {
+  background: var(--color-foreground-hover);
+}
+
+.scroll-box {
+  width: 90%;
+  height: 70vh; /* 70% of the viewport height */
+  overflow-y: auto;
+  margin: 0 auto; /* Center the scroll box */
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-background);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px; /* Increase padding for better spacing */
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  font-weight: bold;
+}
+
+td {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+tr:last-child td {
+  border-bottom: 1px solid var(--color-border); /* Ensure bottom border for the last row */
+}
+
+tr:hover td {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+}
+
+td .action-button {
+  display: flex;
+  justify-content: center;
+}
+
+input, textarea {
+  font-size: 16px; /* Ensure form inputs have readable text */
+}
+
+button {
+  font-size: 16px; /* Ensure buttons have readable text */
+  transition: background 0.3s, transform 0.3s;
+}
+
+button:hover {
+  background: var(--color-foreground-hover);
+  transform: scale(1.05);
+}
