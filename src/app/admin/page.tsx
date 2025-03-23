@@ -91,6 +91,9 @@ export default function Home() {
 
   const handleDeleteProject = async (index: number) => {
     try {
+      setLoading(true);
+      console.log(`Admin: Deleting project at index ${index}`);
+      
       const response = await fetch("/api/deleteProject", {
         method: "POST",
         headers: {
@@ -98,16 +101,23 @@ export default function Home() {
         },
         body: JSON.stringify({ index })
       });
-
+      
+      const data = await response.json();
+      
       if (response.ok) {
+        console.log('Admin: Delete successful', data);
         alert("Project deleted successfully");
-        fetchProjects();
+        // Force refresh to get updated list
+        await fetchProjects(true);
       } else {
-        alert("Failed to delete project");
+        console.error('Admin: Delete failed', data);
+        alert(`Failed to delete project: ${data.error || response.statusText}`);
       }
     } catch (error) {
-      console.error("Failed to delete project:", error);
+      console.error("Admin: Failed to delete project:", error);
       alert("Failed to delete project. Please check the console for more details.");
+    } finally {
+      setLoading(false);
     }
   };
 

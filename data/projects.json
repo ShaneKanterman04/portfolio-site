@@ -1,19 +1,6 @@
 [
   {
-    "title": "Portfolio Website",
-    "image": [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg"
-    ],
-    "skills": [
-      "React",
-      "Next.js",
-      "Tailwind CSS"
-    ],
-    "description": "A personal portfolio website built with modern web technologies."
-  },
-  {
-    "title": "Test2",
+    "title": "Test",
     "image": "",
     "skills": "",
     "description": ""

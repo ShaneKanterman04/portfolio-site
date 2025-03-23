@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveProjectsToBlob, getProjectsFromBlob } from '@/utils/blobStorage';
+import fs from 'fs';
+import path from 'path';
+import { saveProjectsToBlob, getProjectsFromBlob, invalidateProjectsCache } from '@/utils/blobStorage';
 
 // Sample initial projects
 const initialProjects = [
@@ -13,29 +15,39 @@ const initialProjects = [
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if we already have projects
-    const existingProjects = await getProjectsFromBlob();
+    // Read initial data from local file
+    const dataFilePath = path.join(process.cwd(), 'data', 'projects.json');
     
-    // Only initialize if no projects exist
-    if (!existingProjects || existingProjects.length === 0) {
-      const result = await saveProjectsToBlob(initialProjects);
+    // Check if file exists
+    if (!fs.existsSync(dataFilePath)) {
       return NextResponse.json({ 
-        success: true, 
-        message: 'Projects initialized successfully',
-        url: result.url
-      });
-    } else {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Projects already exist, initialization skipped',
-        count: existingProjects.length
-      });
+        error: 'Sample data file not found' 
+      }, { status: 404 });
     }
+    
+    // Read and parse the file
+    const fileContents = fs.readFileSync(dataFilePath, 'utf8');
+    const initialProjects = JSON.parse(fileContents);
+    
+    // Save to blob storage
+    await saveProjectsToBlob(initialProjects);
+    
+    // Clear cache to ensure fresh data on next fetch
+    invalidateProjectsCache();
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Projects initialized successfully',
+      count: initialProjects.length
+    });
   } catch (error) {
     console.error('Error initializing projects:', error);
-    return NextResponse.json({ 
-      error: 'Failed to initialize projects',
-      details: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: 'Failed to initialize projects', 
+        details: error instanceof Error ? error.message : String(error)
+      }, 
+      { status: 500 }
+    );
   }
 }

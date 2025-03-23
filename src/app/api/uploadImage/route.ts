@@ -1,35 +1,43 @@
-import { put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const filename = searchParams.get('filename');
-
-    if (!filename) {
+    const file = await request.blob();
+    
+    // Get the file name from the URL params or generate one
+    const url = new URL(request.url);
+    const filename = url.searchParams.get('filename') || `image-${Date.now()}`;
+    
+    // Validate the file type (optional)
+    const contentType = file.type;
+    if (!contentType.startsWith('image/')) {
       return NextResponse.json(
-        { error: 'Filename is required' },
+        { error: 'File must be an image' },
         { status: 400 }
       );
     }
-
-    // Generate a unique filename to prevent overwrites
-    const uniqueFilename = `projects/${Date.now()}-${filename}`;
     
-    // Read request body as blob
-    const blob = await request.blob();
-    
-    // Upload to Vercel Blob (note: don't use request.body directly, it might be consumed)
-    const result = await put(uniqueFilename, blob, {
+    // Upload to Vercel Blob
+    const blob = await put(filename, file, {
       access: 'public',
+      addRandomSuffix: true, // Add random suffix to avoid name conflicts
     });
-
-    return NextResponse.json(result);
+    
+    // Return the result
+    return NextResponse.json(blob);
   } catch (error) {
-    console.error('Error uploading to Vercel Blob:', error);
+    console.error('Error uploading image:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error instanceof Error ? error.message : String(error) },
+      { error: 'Failed to upload image', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
 }
+
+// Set the maximum file size (optional)
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};

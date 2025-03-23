@@ -1,130 +1,90 @@
-import { put, list } from '@vercel/blob';
-import fs from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 
-const PROJECTS_BLOB_KEY = process.env.PROJECTS_BLOB_NAME || 'projects-data.json';
+// The Vercel Blob storage URL for projects file
+const blobBaseUrl = "https://sp81igolvtunzwsc.public.blob.vercel-storage.com";
+const projectsPath = "/projects-7B1RGZQX0jOkt5dCyMjKgfK12y7cdz.json";
+const blobUrl = blobBaseUrl + projectsPath;
 
-// Cache for storing fetched projects
+// Cache for projects data to reduce redundant fetches
 let projectsCache: any[] | null = null;
-let lastFetchTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
-// Helper to get projects from blob storage with caching
-export async function getProjectsFromBlob(forceRefresh = false) {
+/**
+ * Fetch projects from the Vercel Blob storage
+ * @param forceRefresh Force a refresh from storage instead of using cache
+ * @returns Array of projects
+ */
+export async function getProjectsFromBlob(forceRefresh = false): Promise<any[]> {
+  // Return cached data if available and not forcing refresh
+  if (projectsCache && !forceRefresh) {
+    return projectsCache;
+  }
+
   try {
-    const currentTime = Date.now();
+    console.log('Fetching projects from blob storage:', blobUrl);
     
-    // Return cached data if available and not expired
-    if (!forceRefresh && projectsCache && currentTime - lastFetchTime < CACHE_TTL) {
-      return projectsCache;
-    }
+    // Add cache busting if forcing refresh
+    const fetchUrl = forceRefresh ? `${blobUrl}?t=${Date.now()}` : blobUrl;
     
-    // Try to find the projects file from blob storage using list
-    const { blobs } = await list({ prefix: PROJECTS_BLOB_KEY });
-    
-    // If the projects file doesn't exist in blob storage
-    if (blobs.length === 0) {
-      // Try to load from local file as fallback
-      return getProjectsFromLocal();
-    }
-    
-    // Get the most recent blob URL (should only be one with this key)
-    const blobUrl = blobs[0].url;
-    
-    // Fetch the content from the blob URL
-    const response = await fetch(blobUrl);
-    
+    const response = await fetch(fetchUrl, {
+      cache: forceRefresh ? 'no-store' : 'default',
+      headers: {
+        'Cache-Control': forceRefresh ? 'no-cache' : 'default'
+      }
+    });
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch blob data: ${response.statusText}`);
+      throw new Error(`Failed to fetch projects: ${response.status}`);
     }
+
+    const data = await response.json();
     
-    // Parse and return the projects data
-    const text = await response.text();
-    const projects = JSON.parse(text);
+    // Process the data to ensure it's an array
+    const projectsArray = Array.isArray(data) ? data : 
+                        (data.projects && Array.isArray(data.projects)) ? data.projects : [];
     
     // Update cache
-    projectsCache = projects;
-    lastFetchTime = currentTime;
+    projectsCache = projectsArray;
     
-    return projects;
+    return projectsArray;
   } catch (error) {
-    console.error('Error getting projects from blob:', error);
-    
-    // If blob storage fails, fall back to local file
-    return getProjectsFromLocal();
-  }
-}
-
-// Helper to get projects from local file as fallback
-function getProjectsFromLocal() {
-  try {
-    const dataFilePath = path.join(process.cwd(), 'data', 'projects.json');
-    
-    if (fs.existsSync(dataFilePath)) {
-      const fileContents = fs.readFileSync(dataFilePath, 'utf8');
-      return JSON.parse(fileContents);
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error getting projects from local file:', error);
-    return [];
-  }
-}
-
-// Helper to save projects to blob storage
-export async function saveProjectsToBlob(projects: any[]) {
-  try {
-    const projectsJson = JSON.stringify(projects, null, 2);
-    
-    // Create a proper blob with the right content type
-    const projectsBlob = new Blob([projectsJson], {
-      type: 'application/json',
-    });
-    
-    // Upload to Vercel Blob with the same key
-    const result = await put(PROJECTS_BLOB_KEY, projectsBlob, {
-      access: 'public',
-    });
-    
-    // Update cache after successful save
-    projectsCache = projects;
-    lastFetchTime = Date.now();
-    
-    // Also save to local file as backup
-    saveProjectsToLocal(projects);
-    
-    return result;
-  } catch (error) {
-    console.error('Error saving projects to blob:', error);
-    
-    // If blob storage fails, still try to save locally
-    saveProjectsToLocal(projects);
-    
+    console.error('Error fetching projects from blob:', error);
     throw error;
   }
 }
 
-// Helper to save projects to local file as backup
-function saveProjectsToLocal(projects: any[]) {
+/**
+ * Save projects to the Vercel Blob storage
+ * @param projects Array of projects to save
+ * @returns Result of the blob upload
+ */
+export async function saveProjectsToBlob(projects: any[]) {
   try {
-    const dataDir = path.join(process.cwd(), 'data');
-    const dataFilePath = path.join(dataDir, 'projects.json');
+    console.log('Saving projects to blob storage');
     
-    // Create data directory if it doesn't exist
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
+    // Create JSON content from projects
+    const jsonContent = JSON.stringify(projects, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
     
-    // Write projects to file
-    fs.writeFileSync(dataFilePath, JSON.stringify(projects, null, 2));
+    // Upload to Vercel Blob with the same filename to overwrite
+    const filename = projectsPath.substring(1); // Remove leading slash
+    const result = await put(filename, blob, {
+      access: 'public',
+      addRandomSuffix: false, // Don't add random suffix to keep the same URL
+    });
+    
+    // Update the cache with the new data
+    projectsCache = projects;
+    
+    return result;
   } catch (error) {
-    console.error('Error saving projects to local file:', error);
+    console.error('Error saving projects to blob:', error);
+    throw error;
   }
 }
 
-// Function to invalidate cache and force reload
+/**
+ * Clear the projects cache
+ */
 export function invalidateProjectsCache() {
   projectsCache = null;
-  lastFetchTime = 0;
 }
