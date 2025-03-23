@@ -1,13 +1,20 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { logger } from "../../utils/logger";
 import { withLogging } from "../../middleware/apiLogger";
-import { getProjects, storeProjects, initializeProjectsBlob } from "../../utils/blobStorage";
+import { getProjects, storeProjects, initializeProjectsBlob, Project } from "../../utils/blobStorage";
 import { put } from "@vercel/blob";
+
+interface ProjectInput {
+  title: string;
+  description: string;
+  skills: string[] | string;
+  image: string | string[] | File | Blob;
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      const newProject = req.body;
+      const newProject = req.body as ProjectInput;
       logger.info("Adding new project", { title: newProject.title });
       
       if (!newProject.title || !newProject.description) {
@@ -32,7 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
       
       // Handle image upload if it's a File/Blob
-      let imageUrls = [];
+      let imageUrls: string[] = [];
       if (typeof newProject.image === 'string') {
         // If image is already a URL or comma-separated URLs
         imageUrls = newProject.image.split(",").map((url: string) => url.trim());
@@ -47,7 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         logger.info(`Uploaded project image to: ${url}`);
       }
       
-      const formattedProject = {
+      const formattedProject: Project = {
         image: imageUrls,
         title: newProject.title,
         skills: Array.isArray(newProject.skills) ? newProject.skills : newProject.skills.split(",").map((s: string) => s.trim()),

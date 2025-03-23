@@ -9,6 +9,9 @@ export enum LogLevel {
   ERROR = 'ERROR',
 }
 
+// Type for log data
+export type LogData = Record<string, unknown>;
+
 class Logger {
   private logDir: string;
   private logFile: string;
@@ -23,7 +26,7 @@ class Logger {
     }
   }
   
-  private formatMessage(level: LogLevel, message: string, data?: any): string {
+  private formatMessage(level: LogLevel, message: string, data?: LogData): string {
     const timestamp = new Date().toISOString();
     const dataStr = data ? ` | Data: ${JSON.stringify(data)}` : '';
     return `[${timestamp}] [${level}] ${message}${dataStr}\n`;
@@ -37,7 +40,7 @@ class Logger {
     }
   }
   
-  private log(level: LogLevel, message: string, data?: any): void {
+  private log(level: LogLevel, message: string, data?: LogData): void {
     const formattedMessage = this.formatMessage(level, message, data);
     
     // Write to console
@@ -47,19 +50,19 @@ class Logger {
     this.writeToFile(formattedMessage);
   }
   
-  public debug(message: string, data?: any): void {
+  public debug(message: string, data?: LogData): void {
     this.log(LogLevel.DEBUG, message, data);
   }
   
-  public info(message: string, data?: any): void {
+  public info(message: string, data?: LogData): void {
     this.log(LogLevel.INFO, message, data);
   }
   
-  public warn(message: string, data?: any): void {
+  public warn(message: string, data?: LogData): void {
     this.log(LogLevel.WARN, message, data);
   }
   
-  public error(message: string, data?: any): void {
+  public error(message: string, data?: LogData): void {
     this.log(LogLevel.ERROR, message, data);
   }
 }

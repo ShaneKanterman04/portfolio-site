@@ -1,5 +1,13 @@
-import { put, list, del, get } from "@vercel/blob";
+import { put, getBlob as get } from "@vercel/blob";
 import { logger } from "./logger";
+
+// Project type definition
+export interface Project {
+  title: string;
+  description: string;
+  skills: string[];
+  image: string[];
+}
 
 // Default projects blob name
 const defaultProjectsBlobName = process.env.PROJECTS_BLOB_NAME || 'projects.json';
@@ -7,7 +15,7 @@ const defaultProjectsBlobName = process.env.PROJECTS_BLOB_NAME || 'projects.json
 /**
  * Store projects data in Vercel Blob
  */
-export async function storeProjects(projects: any[], blobName: string = defaultProjectsBlobName) {
+export async function storeProjects(projects: Project[], blobName: string = defaultProjectsBlobName) {
   try {
     const { url } = await put(blobName, JSON.stringify(projects, null, 2), {
       access: 'public',
@@ -31,11 +39,11 @@ export async function getProjects(blobName: string = defaultProjectsBlobName) {
     
     if (!blob) {
       logger.warn(`Blob not found: ${blobName}`);
-      return { projects: [], success: false, exists: false };
+      return { projects: [] as Project[], success: false, exists: false };
     }
     
     const content = await blob.text();
-    const projects = JSON.parse(content);
+    const projects = JSON.parse(content) as Project[];
     
     logger.info(`Successfully retrieved ${projects.length} projects from Blob`);
     return { projects, success: true, exists: true };
@@ -44,10 +52,10 @@ export async function getProjects(blobName: string = defaultProjectsBlobName) {
     
     // If the blob doesn't exist yet, return an empty array
     if ((error as Error).message.includes('not found')) {
-      return { projects: [], success: true, exists: false };
+      return { projects: [] as Project[], success: true, exists: false };
     }
     
-    return { projects: [], success: false, error, exists: false };
+    return { projects: [] as Project[], success: false, error, exists: false };
   }
 }
 
