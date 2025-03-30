@@ -24,7 +24,7 @@ export default function Home() {
     console.log('Home: Fetching data from API route');
     
     // Use our own API route instead of direct Blob storage access
-    const apiUrl = `/api/getProjects?refresh=true&t=${Date.now()}`;
+    const apiUrl = `/api/getProjects`;
     
     fetch(apiUrl, {
       cache: 'no-store',
