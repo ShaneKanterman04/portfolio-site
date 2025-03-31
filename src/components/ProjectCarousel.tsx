@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+//import React, { useEffect } from "react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import ProjectCard from "./ProjectCard";
@@ -19,13 +19,6 @@ interface ProjectCarouselProps {
 const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ projects }) => {
   console.log('Projects data in carousel:', projects);
   console.log('Number of projects:', projects.length);
-  
-  // Log each project individually for debugging
-  useEffect(() => {
-    projects.forEach((project, index) => {
-      console.log(`Project ${index}:`, project);
-    });
-  }, [projects]);
 
   return (
     <div className="carousel-wrapper">

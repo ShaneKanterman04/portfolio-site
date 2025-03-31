@@ -30,12 +30,30 @@ export default function Home() {
     setPassword(e.target.value);
   };
 
-  const handleLogin = () => {
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
       setIsAuthenticated(true);
       fetchProjects();
-    } else {
-      alert("Incorrect password");
+      } else {
+      alert(data.message || "Authentication failed");
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      alert("Authentication failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
