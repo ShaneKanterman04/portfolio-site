@@ -43,7 +43,6 @@ export default function Home() {
         
         // Only show the alert once during development
         if (!fetchedRef.current && process.env.NODE_ENV === 'development') {
-          alert('Raw data from API: ' + JSON.stringify(data, null, 2));
           fetchedRef.current = true;
         }
         
@@ -55,7 +54,7 @@ export default function Home() {
         console.log('Home: Number of projects:', projectsArray.length);
         
         // Make sure each project has an images array
-        const normalizedProjects = projectsArray.map((project: any) => ({
+        const normalizedProjects = projectsArray.map((project: Project) => ({
           ...project,
           images: Array.isArray(project.images) ? project.images : 
                   (typeof project.images === 'string' ? [project.images] : [])

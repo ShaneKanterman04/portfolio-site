@@ -262,6 +262,11 @@ export default function Home() {
             type="password"
             value={password}
             onChange={handlePasswordChange}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleLogin();
+              }
+            }}
             placeholder="Enter password"
             className="border p-2"
           />
