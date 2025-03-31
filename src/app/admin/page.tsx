@@ -19,10 +19,13 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [newProject, setNewProject] = useState({
     title: "",
-    images: "",
     skills: "",
     description: "",
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,12 +96,55 @@ export default function Home() {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFiles(e.target.files);
+    }
+  };
+
+  const uploadImages = async () => {
+    if (!selectedFiles || selectedFiles.length === 0) {
+      return [];
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        formData.append("files", selectedFiles[i]);
+      }
+
+      const response = await fetch("/api/uploadImages", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload images");
+      }
+
+      const data = await response.json();
+      setUploadedImagePaths(data.files);
+      return data.files;
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Failed to upload images. Please try again.");
+      return [];
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleAddProject = async () => {
     try {
-      // Convert comma-separated strings to arrays for images and skills
+      // First upload any images
+      const imagePaths = await uploadImages();
+
+      // Prepare project data using uploaded image paths
       const projectData = {
         title: newProject.title,
-        images: newProject.images.split(",").map((item) => item.trim()),
+        images: imagePaths,
         skills: newProject.skills.split(",").map((item) => item.trim()),
         description: newProject.description,
       };
@@ -114,7 +160,9 @@ export default function Home() {
       if (response.ok) {
         alert("Project added successfully");
         fetchProjects();
-        setNewProject({ title: "", images: "", skills: "", description: "" });
+        setNewProject({ title: "", skills: "", description: "" });
+        setSelectedFiles(null);
+        setUploadedImagePaths([]);
       } else {
         alert("Failed to add project");
       }
@@ -180,6 +228,32 @@ export default function Home() {
     }
   }, [isAuthenticated]);
 
+  // Function to render image thumbnails
+  const renderImageThumbnails = (imagePaths: string[]) => {
+    if (!imagePaths || imagePaths.length === 0) {
+      return <span className="text-gray-500">No images</span>;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {imagePaths.map((path, i) => (
+          <div key={i} className="relative">
+            <img
+              src={path}
+              alt={`Project image ${i + 1}`}
+              className="w-12 h-12 object-cover rounded border border-gray-300"
+            />
+          </div>
+        ))}
+        {imagePaths.length > 3 && (
+          <span className="text-xs text-gray-500 flex items-center ml-1">
+            +{imagePaths.length - 3} more
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       {!isAuthenticated ? (
@@ -210,19 +284,6 @@ export default function Home() {
               >
                 Refresh
               </button>
-              <button
-                onClick={handleInitProjects}
-                className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600"
-                disabled={loading}
-              >
-                Init Sample Data
-              </button>
-              <Link
-                href="/admin/upload"
-                className="p-2 bg-green-500 text-white rounded hover:bg-green-600 inline-block"
-              >
-                Upload Images
-              </Link>
             </div>
           </div>
 
@@ -263,9 +324,7 @@ export default function Home() {
                       <tr key={project.id || index}>
                         <td className="border px-4 py-2">{project.title}</td>
                         <td className="border px-4 py-2">
-                          {Array.isArray(project.images)
-                            ? project.images.join(", ")
-                            : project.images}
+                          {renderImageThumbnails(project.images)}
                         </td>
                         <td className="border px-4 py-2">
                           {Array.isArray(project.skills)
@@ -298,13 +357,39 @@ export default function Home() {
                     </td>
                     <td className="border px-4 py-2">
                       <input
-                        type="text"
-                        name="images"
-                        value={newProject.images}
-                        onChange={handleNewProjectChange}
-                        placeholder="Images (comma separated)"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
                         className="w-full p-1 border rounded"
                       />
+                      {selectedFiles && selectedFiles.length > 0 && (
+                        <div className="mt-2 text-sm text-gray-600">
+                          {selectedFiles.length} file(s) selected
+                        </div>
+                      )}
+                      {uploadedImagePaths.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-sm text-green-600 mb-1">
+                            {uploadedImagePaths.length} image(s) uploaded
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {uploadedImagePaths.slice(0, 3).map((path, i) => (
+                              <img
+                                key={i}
+                                src={path}
+                                alt={`Uploaded ${i + 1}`}
+                                className="w-8 h-8 object-cover rounded"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {uploading && (
+                        <div className="mt-2 text-sm text-blue-600">
+                          Uploading...
+                        </div>
+                      )}
                     </td>
                     <td className="border px-4 py-2">
                       <input
@@ -330,8 +415,9 @@ export default function Home() {
                       <button
                         onClick={handleAddProject}
                         className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        disabled={uploading}
                       >
-                        Add Project
+                        {uploading ? "Uploading..." : "Add Project"}
                       </button>
                     </td>
                   </tr>

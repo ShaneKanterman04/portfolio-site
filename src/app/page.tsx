@@ -6,7 +6,7 @@ import React, { useEffect, useState, useRef } from "react";
 // Define a type for projects
 type Project = {
   title: string;
-  image: string[];
+  images: string[]; // Changed from image to images to match the backend model
   skills: string[];
   description: string;
   [key: string]: unknown; // Allow for additional properties
@@ -41,8 +41,8 @@ export default function Home() {
       .then((data) => {
         console.log('Home: Raw data from API:', data);
         
-        // Only show the alert once
-        if (!fetchedRef.current) {
+        // Only show the alert once during development
+        if (!fetchedRef.current && process.env.NODE_ENV === 'development') {
           alert('Raw data from API: ' + JSON.stringify(data, null, 2));
           fetchedRef.current = true;
         }
@@ -54,12 +54,15 @@ export default function Home() {
         console.log('Home: Projects array:', projectsArray);
         console.log('Home: Number of projects:', projectsArray.length);
         
-        // Debugging each project individually
-        projectsArray.forEach((project: Project, index: number) => {
-          console.log(`Project ${index}:`, project);
-        });
+        // Make sure each project has an images array
+        const normalizedProjects = projectsArray.map((project: any) => ({
+          ...project,
+          images: Array.isArray(project.images) ? project.images : 
+                  (typeof project.images === 'string' ? [project.images] : [])
+        }));
         
-        setProjects(projectsArray);
+        console.log('Home: Normalized projects:', normalizedProjects);
+        setProjects(normalizedProjects);
       })
       .catch((err) => {
         console.error("Error fetching projects:", err);
@@ -86,9 +89,11 @@ export default function Home() {
             technologies, including C++, C#, React, React Native, Node.js, and Python. I am always
             looking to learn new things and improve my skills.
           </p>       
-          <div className="w-200">
+          <div className="w-full max-w-4xl">
           {error ? (
             <p className="text-red-500">Error loading projects: {error}</p>
+          ) : projects.length === 0 ? (
+            <p>Loading projects...</p>
           ) : (
             <ProjectCarousel key={projects.length} projects={projects} />
           )}
