@@ -113,10 +113,12 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         <div className="relative w-full bg-gray-900 mb-4 rounded overflow-hidden" style={{ height: `${imageHeight}px` }}>
           {currentImage ? (
             <div className="relative w-full h-full">
-              <img
+              <Image
                 src={currentImage}
                 alt={`${currentProject.title} screenshot`}
                 className="object-contain w-full h-full"
+                width={800}
+                height={600}
               />
               
               {/* Image navigation arrows (only show if multiple images) */}

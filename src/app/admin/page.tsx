@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import Image from "next/image";
 
 // Define project type with standardized fields
 interface Project {
@@ -77,7 +77,6 @@ export default function Home() {
         );
       }
       const data = await response.json();
-      alert("Raw data from API: " + JSON.stringify(data, null, 2));
       setProjects(data.projects);
     } catch (error) {
       console.error("Failed to fetch projects:", error);
@@ -177,7 +176,7 @@ export default function Home() {
   const handleDeleteProject = async (index: number) => {
     try {
       setLoading(true);
-      console.log(`Admin: Deleting project at index ${index}`);
+      console.error(`Admin: Deleting project at index ${index}`);
 
       const response = await fetch("/api/deleteProject", {
         method: "POST",
@@ -190,7 +189,7 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Admin: Delete successful", data);
+        console.error("Admin: Delete successful", data);
         alert("Project deleted successfully");
         // Force refresh to get updated list
         await fetchProjects(true);
@@ -238,10 +237,12 @@ export default function Home() {
       <div className="flex flex-wrap gap-1">
         {imagePaths.map((path, i) => (
           <div key={i} className="relative">
-            <img
+            <Image
               src={path}
               alt={`Project image ${i + 1}`}
               className="w-12 h-12 object-cover rounded border border-gray-300"
+              width={48}
+              height={48}
             />
           </div>
         ))}
@@ -263,7 +264,7 @@ export default function Home() {
             value={password}
             onChange={handlePasswordChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 handleLogin();
               }
             }}
@@ -288,6 +289,13 @@ export default function Home() {
                 disabled={loading}
               >
                 Refresh
+              </button>
+              <button
+                onClick={handleInitProjects}
+                className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                disabled={loading}
+              >
+                Initialize Projects
               </button>
             </div>
           </div>
@@ -380,11 +388,13 @@ export default function Home() {
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {uploadedImagePaths.slice(0, 3).map((path, i) => (
-                              <img
+                              <Image
                                 key={i}
                                 src={path}
                                 alt={`Uploaded ${i + 1}`}
                                 className="w-8 h-8 object-cover rounded"
+                                width={32}
+                                height={32}
                               />
                             ))}
                           </div>
